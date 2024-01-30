@@ -7,7 +7,8 @@ params.input_library = "ALL_GNPS_NO_PROPOGATED" // Which GNPS library to use as 
 params.input_mgf = "mgf_file.mgf" // Pickle file to use as a query
 
 // Search Parameters
-params.search_index = "massivekb_index" // Which index to search against, usually [massivekb_index, gnpslibrary]
+// Which index to search against, usually [massivedata_index, gnpslibrary], massivekb_index for proteomics
+params.search_index = "massivedata_index" 
 params.analog_search = false // Whether to perform analog search
 params.no_cache = false // Whether to use the cache
 params.lower_delta = 130 
