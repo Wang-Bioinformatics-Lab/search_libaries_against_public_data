@@ -37,15 +37,31 @@ def build_url(spectrum, args):
     }
 
     return {'url': base_url ,'data': data}
-    
+
+def pretty_print_POST(req):
+    """
+    At this point it is completely built and ready
+    to be fired; it is "prepared".
+
+    However pay attention at the formatting used in 
+    this function because it is programmed to be pretty 
+    printed and may differ from the actual request.
+    """
+    print('{}\n{}\r\n{}\r\n\r\n{}'.format(
+        '-----------START-----------',
+        req.method + ' ' + req.url,
+        '\r\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items()),
+        req.body,
+    ))
+
 
 def main():
     parser = argparse.ArgumentParser(description='Search MGF against index')
     parser.add_argument('--input_mgf', type=str, help='Input MGF file')
     parser.add_argument('--search_index', type=str, help='Search index')
     parser.add_argument('--output', type=str, help='Output file')
-    parser.add_argument('--analog', type=bool, default=False, help='Search analogs')
-    parser.add_argument('--no_cache', type=bool, default=False, help='Do not use cache')
+    parser.add_argument('--analog', default='False', help='Search analogs')
+    parser.add_argument('--no_cache', default='False', help='Do not use cache')
     parser.add_argument('--lower_delta', type=float, default=130, help='Lower delta mass')
     parser.add_argument('--upper_delta', type=float, default=200, help='Upper delta mass')
     parser.add_argument('--pm_tolerance', type=float, default=0.05, help='Precursor mass tolerance')
@@ -54,11 +70,14 @@ def main():
                         
     args = parser.parse_args()
     
+    args.analog = args.analog.lower() == 'true'
+    args.no_cache = args.no_cache.lower() == 'true'
+    
     # Print all arguments
     print("Input arguments:")
     for arg in vars(args):
         print(arg, getattr(args, arg))
-    
+
     spectra = matchms.importing.load_from_mgf(args.input_mgf)  
     
     print("Preparring URLs")
@@ -74,6 +93,7 @@ def main():
             for _ in range(3):
                 try:
                     response = requests.post(query['url'], data=query['data'])
+                    # pretty_print_POST(response.request)
                     if response.status_code == 200:
                         json_response = response.json()
                         for match in json_response['results']:
